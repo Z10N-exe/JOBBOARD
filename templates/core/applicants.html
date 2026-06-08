@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Applicants for {{ job.title }}</h1>
+<div class="summary-grid">
+  <div class="card">
+    <h3>Total Applicants</h3>
+    <p>{{ applications|length }}</p>
+  </div>
+  <div class="card">
+    <h3>Application Status</h3>
+    <div class="status-summary">
+      {% for status in status_counts %}
+        <span class="status-chip">{{ status.status|title }}: {{ status.count }}</span>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% if applications %}
+  <table class="table">
+    <thead>
+      <tr><th>Applicant</th><th>Email</th><th>Score</th><th>Status</th><th>Manage</th></tr>
+    </thead>
+    <tbody>
+      {% for application in applications %}
+        <tr>
+          <td>{{ application.job_seeker.first_name }} {{ application.job_seeker.last_name }}</td>
+          <td>{{ application.job_seeker.user.email }}</td>
+          <td>{{ application.match_score|floatformat:2 }}</td>
+          <td><span class="status-badge {{ application.get_status_display|lower }}">{{ application.get_status_display }}</span></td>
+          <td><a class="button" href="{% url 'update_application_status' application.id %}">Update</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No applications have been submitted for this job yet.</p>
+{% endif %}
+{% endblock %}

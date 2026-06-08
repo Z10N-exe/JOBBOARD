@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<div class="form-card">
+  <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+          <div class="errorlist">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {{ form.as_p }}
+      <button class="button" type="submit">Save Job</button>
+  </form>
+</div>
+{% endblock %}

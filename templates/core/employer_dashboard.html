@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero">
+    <h1>Employer Dashboard</h1>
+    <p>Welcome, <strong>{{ employer_profile.company_name }}</strong>. Manage listings, applicants, and hiring progress in one place.</p>
+    <div class="controls">
+        <a class="button" href="{% url 'create_job' %}">Post New Job</a>
+        <a class="button button-secondary" href="{% url 'job_list' %}">View Public Listings</a>
+    </div>
+</div>
+
+<section class="summary-grid">
+    <div class="card">
+        <h3>Total Jobs</h3>
+        <p>{{ total_jobs }} total</p>
+        <p>{{ active_jobs }} active</p>
+    </div>
+    <div class="card">
+        <h3>Total Applicants</h3>
+        <p>{{ total_applicants }} applicants across your listings.</p>
+    </div>
+    <div class="card">
+        <h3>Quick Action</h3>
+        <p><a class="button" href="{% url 'create_job' %}">New Job</a></p>
+    </div>
+</section>
+
+{% if top_jobs %}
+<section>
+    <h2>Most Applied Jobs</h2>
+    <div class="card-grid">
+        {% for job in top_jobs %}
+            <div class="card">
+                <h3>{{ job.title }}</h3>
+                <p>{{ job.location }} • {{ job.employment_type }}</p>
+                <p>{{ job.applicant_count }} applicant{{ job.applicant_count|pluralize }}</p>
+                <p>{{ job.description|truncatechars:140 }}</p>
+                <div class="actions">
+                    <a class="button" href="{% url 'job_applicants' job.id %}">View Applicants</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section>
+    <h2>Your Jobs</h2>
+    {% if jobs %}
+        <div class="card-grid">
+            {% for job in jobs %}
+                <div class="card">
+                    <div class="job-card-header">
+                        <h3>{{ job.title }}</h3>
+                        <span class="status-badge {{ job.is_active|yesno:'active,inactive' }}">{{ job.is_active|yesno:'Active,Inactive' }}</span>
+                    </div>
+                    <p>{{ job.location }} • {{ job.employment_type }} • Posted {{ job.date_posted|date:'Y-m-d' }}</p>
+                    <p>{{ job.description|truncatechars:140 }}</p>
+                    <p><strong>{{ job.applicant_count }}</strong> applicant{{ job.applicant_count|pluralize }}</p>
+                    <div class="actions">
+                        <a class="button" href="{% url 'job_applicants' job.id %}">Applicants</a>
+                        <a class="button button-secondary" href="{% url 'edit_job' job.id %}">Edit</a>
+                        <a class="button button-secondary" href="{% url 'delete_job' job.id %}">Delete</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No jobs posted yet. Start by posting your first job.</p>
+    {% endif %}
+</section>
+{% endblock %}

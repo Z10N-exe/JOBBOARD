@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Create an account</h1>
+<p>Select the account type that best describes your role.</p>
+<div>
+    <a class="button" href="{% url 'register_seeker' %}">Job Seeker</a>
+    <a class="button button-secondary" href="{% url 'register_employer' %}">Employer</a>
+</div>
+{% endblock %}

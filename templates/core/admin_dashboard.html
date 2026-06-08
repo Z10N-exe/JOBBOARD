@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="background:#111827;color:#e5e7eb;padding:24px;border-radius:12px;overflow-x:auto;">
+    <pre style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; color:#f8fafc; line-height:1.4;">
++----------------------------------------------------------+
+|                     Admin Dashboard                      |
++----------------------------------------------------------+
+| Total Users: {{ total_users }} | Data Breaches: {{ data_breaches }} | Alerts: {{ alerts }} |
++----------------------------------------------------------+
+| Total Job Posts: {{ total_jobs }} | Applications: {{ total_applications }} |
+| Seekers: {{ seekers_count }} | Employers: {{ employers_count }} |
++----------------------------------------------------------+
+| Recent Access Logs:                                       |
+| [User]          [Access Time]   [Status]                  |
+{% for log in recent_logs %}| {{ log.user }} | {{ log.access_time }} | {{ log.status }} |
+{% endfor %}+----------------------------------------------------------+
+| System Health:                                            |
+| CPU Usage: 30%  | Memory Usage: 48%                       |
++----------------------------------------------------------+
+| [Download Reports] [View Detailed Logs]                    |
++----------------------------------------------------------+
+    </pre>
+</div>
+{% endblock %}

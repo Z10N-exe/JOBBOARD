@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ job.title }}</h1>
+<p><strong>Employer:</strong> {{ job.employer.company_name }}</p>
+<p><strong>Location:</strong> {{ job.location }}</p>
+<p><strong>Experience:</strong> {{ job.min_experience }} years</p>
+<p><strong>Type:</strong> {{ job.get_employment_type_display }}</p>
+<h2>Description</h2>
+<p>{{ job.description }}</p>
+<h2>Required Skills</h2>
+<p>{{ job.required_skills_text }}</p>
+{% if user.is_authenticated and user.role == 'seeker' %}
+    <a class="button" href="{% url 'apply_job' job.id %}">Apply to this Job</a>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Update Application Status</h1>
+<p>Applicant: {{ application.job_seeker.first_name }} {{ application.job_seeker.last_name }}</p>
+<p>Job: {{ application.job.title }}</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="button" type="submit">Save Status</button>
+</form>
+{% endblock %}

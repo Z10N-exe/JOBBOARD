@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Employer Registration</h1>
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% if user_form.non_field_errors %}
+        <div class="errorlist">{{ user_form.non_field_errors }}</div>
+    {% endif %}
+    <label for="id_email">Email</label>
+    {{ user_form.email }}
+    {% if user_form.email.errors %}
+        <div class="errorlist">{{ user_form.email.errors }}</div>
+    {% endif %}
+
+    <label for="id_password1">Password</label>
+    {{ user_form.password1 }}
+    {% if user_form.password1.errors %}
+        <div class="errorlist">{{ user_form.password1.errors }}</div>
+    {% endif %}
+
+    <label for="id_password2">Confirm Password</label>
+    {{ user_form.password2 }}
+    {% if user_form.password2.errors %}
+        <div class="errorlist">{{ user_form.password2.errors }}</div>
+    {% endif %}
+    <div style="display:none">{{ user_form.role }}</div>
+
+    <h2>Company Profile</h2>
+    {% if profile_form.non_field_errors %}
+        <div class="errorlist">{{ profile_form.non_field_errors }}</div>
+    {% endif %}
+    {{ profile_form.as_p }}
+
+    <button class="button" type="submit">Create Employer Account</button>
+</form>
+{% endblock %}

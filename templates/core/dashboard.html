@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<p>Welcome, {{ request.user.email }}!</p>
+{% if request.user.role == 'seeker' %}
+    <p>Use your dashboard to manage your resume, view recommended jobs, and track applications.</p>
+{% elif request.user.role == 'employer' %}
+    <p>Use your dashboard to post jobs, rank applicants, and update hiring status.</p>
+{% else %}
+    <p>Use the admin site for system management.</p>
+{% endif %}
+{% endblock %}

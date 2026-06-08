@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Upload Your Resume</h1>
+<div class="form-card">
+  <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+          <div class="errorlist">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <label for="id_uploaded_file">Resume File</label>
+      {{ form.uploaded_file }}
+      {% if form.uploaded_file.errors %}
+          <div class="errorlist">{{ form.uploaded_file.errors }}</div>
+      {% endif %}
+      <button class="button" type="submit">Upload Resume</button>
+  </form>
+</div>
+{% if resume %}
+    <h2>Current Resume</h2>
+    <p>Uploaded on {{ resume.uploaded_date }}</p>
+    <p>{{ resume.uploaded_file.name }}</p>
+{% endif %}
+{% endblock %}

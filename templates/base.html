@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Board</title>
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="site-brand">
+            <a href="{% url 'home' %}"><span class="logo">Job<span class="logo-accent">Board</span></span></a>
+        </div>
+        <nav class="site-nav">
+            <a href="{% url 'job_list' %}">Browse Jobs</a>
+            {% if user.is_authenticated %}
+                {% if user.role == 'admin' %}
+                    <a href="{% url 'admin_dashboard' %}">Admin</a>
+                {% elif user.role == 'employer' %}
+                    <a href="{% url 'employer_dashboard' %}">Employer</a>
+                {% else %}
+                    <a href="{% url 'seeker_dashboard' %}">Seeker</a>
+                {% endif %}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'account_choice' %}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">&copy; {% now "Y" %} Job Board — Built with Django</div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Available Jobs</h1>
+<form method="get">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search jobs by title or keyword" />
+    <button class="button" type="submit">Search</button>
+</form>
+{% if jobs %}
+    <table>
+        <thead>
+            <tr><th>Title</th><th>Employer</th><th>Location</th><th>Match</th></tr>
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+                <tr>
+                    <td><a href="{% url 'job_detail' job.id %}">{{ job.title }}</a></td>
+                    <td>{{ job.employer.company_name }}</td>
+                    <td>{{ job.location }}</td>
+                    <td>{{ job.min_experience }} yrs</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No jobs found matching your search.</p>
+{% endif %}
+{% endblock %}

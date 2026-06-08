@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Job Seeker Dashboard</h1>
+<p>Welcome back, {{ seeker_profile.first_name }} {{ seeker_profile.last_name }}.</p>
+<div>
+    <a class="button" href="{% url 'upload_resume' %}">Upload / Update Resume</a>
+    <a class="button button-secondary" href="{% url 'job_list' %}">Browse Active Jobs</a>
+</div>
+
+<h2>Your Resume</h2>
+{% if resume %}
+    <p>Uploaded on {{ resume.uploaded_date }}</p>
+    <pre style="background:#f3f4f6;padding:12px;border-radius:8px;white-space:pre-wrap;">{{ resume.extracted_text|truncatechars:300 }}</pre>
+{% else %}
+    <p>No resume uploaded yet.</p>
+{% endif %}
+
+<h2>Recommended Jobs</h2>
+{% if recommendations %}
+    <table>
+        <thead>
+            <tr><th>Job Title</th><th>Employer</th><th>Match Score</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            {% for item in recommendations %}
+                <tr>
+                    <td><a href="{% url 'job_detail' item.job.id %}">{{ item.job.title }}</a></td>
+                    <td>{{ item.job.employer.company_name }}</td>
+                    <td>{{ item.score|floatformat:2 }}</td>
+                    <td><a class="button" href="{% url 'apply_job' item.job.id %}">Apply</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No recommendations available yet. Upload your resume to see job recommendations.</p>
+{% endif %}
+
+<h2>My Applications</h2>
+{% if applications %}
+    <table>
+        <thead>
+            <tr><th>Job Title</th><th>Status</th><th>Applied On</th></tr>
+        </thead>
+        <tbody>
+            {% for application in applications %}
+                <tr>
+                    <td>{{ application.job.title }}</td>
+                    <td>{{ application.get_status_display }}</td>
+                    <td>{{ application.applied_date|date:'Y-m-d' }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You have not applied to any jobs yet.</p>
+{% endif %}
+{% endblock %}
