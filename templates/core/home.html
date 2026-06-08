@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>Find great people. Build great teams.</h1>
+        <p>Post jobs, discover qualified candidates quickly, and manage applications from one simple dashboard.</p>
+        <div class="controls">
+            <a class="button button-primary" href="{% url 'account_choice' %}">Get Started</a>
+            <a class="button button-secondary" href="{% url 'login' %}">Sign In</a>
+        </div>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="section-header">
+        <h2>How It Works</h2>
+        <p>A platform built for efficiency and connection</p>
+    </div>
+    <div class="grid">
+        <div class="card feature-card">
+            <div class="card-icon">💼</div>
+            <h3>For Employers</h3>
+            <p>Post jobs, review applicants, and manage listings with a clean workflow. Find the right talent in minutes.</p>
+            <a href="{% url 'job_list' %}" class="card-link">Browse →</a>
+        </div>
+        <div class="card feature-card">
+            <div class="card-icon">🎯</div>
+            <h3>For Job Seekers</h3>
+            <p>Upload your resume and get matches based on your skills and experience. Apply to jobs you love.</p>
+            <a href="{% url 'job_list' %}" class="card-link">Explore Jobs →</a>
+        </div>
+        <div class="card feature-card">
+            <div class="card-icon">🛡️</div>
+            <h3>For Admins</h3>
+            <p>Monitor activity, manage users, and keep the platform healthy. Full control and transparency.</p>
+            <a href="{% url 'login' %}" class="card-link">Admin Login →</a>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="cta-content">
+        <h2>Ready to get started?</h2>
+        <p>Join thousands of employers and job seekers on our platform</p>
+        <div class="cta-buttons">
+            <a class="button button-primary button-large" href="{% url 'account_choice' %}">Create Account</a>
+            <a class="button button-ghost button-large" href="{% url 'job_list' %}">Browse Jobs</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
