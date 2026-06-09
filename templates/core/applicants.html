@@ -20,7 +20,7 @@
 {% if applications %}
   <table class="table">
     <thead>
-      <tr><th>Applicant</th><th>Email</th><th>Score</th><th>Status</th><th>Manage</th></tr>
+      <tr><th>Applicant</th><th>Email</th><th>Score</th><th>Top Keywords</th><th>Status</th><th>Manage</th></tr>
     </thead>
     <tbody>
       {% for application in applications %}
@@ -28,6 +28,7 @@
           <td>{{ application.job_seeker.first_name }} {{ application.job_seeker.last_name }}</td>
           <td>{{ application.job_seeker.user.email }}</td>
           <td>{{ application.match_score|floatformat:2 }}</td>
+          <td>{{ application.top_keywords|join:", "|default:"-" }}</td>
           <td><span class="status-badge {{ application.get_status_display|lower }}">{{ application.get_status_display }}</span></td>
           <td><a class="button" href="{% url 'update_application_status' application.id %}">Update</a></td>
         </tr>

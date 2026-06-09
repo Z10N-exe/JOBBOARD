@@ -3,6 +3,24 @@
 {% block content %}
 <h1>Job Seeker Dashboard</h1>
 <p>Welcome back, {{ seeker_profile.first_name }} {{ seeker_profile.last_name }}.</p>
+
+<div class="summary-grid">
+    <div class="card">
+        <h3>Profile Completeness</h3>
+        <p>{{ completeness_score|floatformat:0 }}%</p>
+        <div style="background:#e5e7eb;height:8px;border-radius:4px;margin-top:8px;">
+            <div style="background:#10b981;height:100%;border-radius:4px;width:{{ completeness_score }}%;"></div>
+        </div>
+        <small style="color:#666;">
+            {% if completeness_fields.first_name %}✓{% else %}✗{% endif %} Name |
+            {% if completeness_fields.phone %}✓{% else %}✗{% endif %} Phone |
+            {% if completeness_fields.location %}✓{% else %}✗{% endif %} Location |
+            {% if completeness_fields.skills_text %}✓{% else %}✗{% endif %} Skills |
+            {% if completeness_fields.resume %}✓{% else %}✗{% endif %} Resume
+        </small>
+    </div>
+</div>
+
 <div>
     <a class="button" href="{% url 'upload_resume' %}">Upload / Update Resume</a>
     <a class="button button-secondary" href="{% url 'job_list' %}">Browse Active Jobs</a>
@@ -20,7 +38,7 @@
 {% if recommendations %}
     <table>
         <thead>
-            <tr><th>Job Title</th><th>Employer</th><th>Match Score</th><th>Action</th></tr>
+            <tr><th>Job Title</th><th>Employer</th><th>Match Score</th><th>Top Keywords</th><th>Action</th></tr>
         </thead>
         <tbody>
             {% for item in recommendations %}
@@ -28,6 +46,7 @@
                     <td><a href="{% url 'job_detail' item.job.id %}">{{ item.job.title }}</a></td>
                     <td>{{ item.job.employer.company_name }}</td>
                     <td>{{ item.score|floatformat:2 }}</td>
+                    <td>{{ item.keywords|join:", "|default:"-" }}</td>
                     <td><a class="button" href="{% url 'apply_job' item.job.id %}">Apply</a></td>
                 </tr>
             {% endfor %}

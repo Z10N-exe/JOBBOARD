@@ -3,8 +3,8 @@
 {% block content %}
 <h1>Create an account</h1>
 <p>Select the account type that best describes your role.</p>
-<div>
+<div style="display: flex; gap: 16px; flex-wrap: wrap;">
     <a class="button" href="{% url 'register_seeker' %}">Job Seeker</a>
-    <a class="button button-secondary" href="{% url 'register_employer' %}">Employer</a>
+    <a class="button button-ghost" href="{% url 'register_employer' %}">Employer</a>
 </div>
 {% endblock %}

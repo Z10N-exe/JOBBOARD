@@ -22,7 +22,11 @@ def preprocess_text(raw_text: str) -> str:
     return ' '.join(stems)
 
 
-def compute_relevance(job_description: str, resume_text: str, corpus_texts=None) -> float:
+def compute_relevance(job_description: str, resume_text: str, corpus_texts=None) -> tuple:
+    """
+    Compute relevance score and top contributing keywords between job description and resume.
+    Returns tuple of (score, top_keywords_list).
+    """
     documents = [preprocess_text(job_description)]
     if corpus_texts:
         documents.extend(preprocess_text(text) for text in corpus_texts)
@@ -31,7 +35,16 @@ def compute_relevance(job_description: str, resume_text: str, corpus_texts=None)
     vectorizer = TfidfVectorizer()
     vectors = vectorizer.fit_transform(documents)
     similarity = cosine_similarity(vectors[0], vectors[-1])[0][0]
-    return float(similarity)
+    
+    # Extract top contributing keywords from job description
+    feature_names = vectorizer.get_feature_names_out()
+    job_vector = vectors[0].toarray().flatten()
+    
+    # Get indices of top 5 terms with highest TF-IDF scores in job description
+    top_indices = job_vector.argsort()[-5:][::-1]
+    top_keywords = [feature_names[i] for i in top_indices if job_vector[i] > 0]
+    
+    return float(similarity), top_keywords[:3]  # Return score and top 3 keywords
 
 
 def extract_text_from_file(uploaded_file) -> str:

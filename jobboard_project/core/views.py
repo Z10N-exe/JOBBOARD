@@ -93,16 +93,29 @@ def dashboard(request):
 @login_required
 def seeker_dashboard(request):
     if request.user.role != 'seeker':
-        return HttpResponseForbidden('Access restricted to job seekers.')
+        messages.error(request, 'Access restricted to job seekers. Please login with a job seeker account.')
+        return redirect('login')
 
     seeker_profile = get_object_or_404(JobSeekerProfile, user=request.user)
     resume = getattr(seeker_profile, 'resume', None)
+    
+    # Calculate profile completeness
+    completeness_fields = {
+        'first_name': bool(seeker_profile.first_name),
+        'last_name': bool(seeker_profile.last_name),
+        'phone': bool(seeker_profile.phone),
+        'location': bool(seeker_profile.location),
+        'skills_text': bool(seeker_profile.skills_text),
+        'resume': bool(resume and resume.extracted_text.strip()),
+    }
+    completeness_score = sum(completeness_fields.values()) / len(completeness_fields) * 100
+    
     recommendations = []
     if resume and resume.extracted_text.strip():
         active_jobs = Job.objects.filter(is_active=True)
         for job in active_jobs:
-            score = compute_relevance(job.description, resume.extracted_text)
-            recommendations.append({'job': job, 'score': score})
+            score, keywords = compute_relevance(job.description, resume.extracted_text)
+            recommendations.append({'job': job, 'score': score, 'keywords': keywords})
         recommendations.sort(key=lambda item: item['score'], reverse=True)
 
     applications = Application.objects.filter(job_seeker=seeker_profile).select_related('job')
@@ -112,6 +125,8 @@ def seeker_dashboard(request):
         'resume': resume,
         'recommendations': recommendations[:10],
         'applications': applications,
+        'completeness_score': completeness_score,
+        'completeness_fields': completeness_fields,
     })
 
 
@@ -148,11 +163,19 @@ def upload_resume(request):
     if request.method == 'POST':
         form = ResumeUploadForm(request.POST, request.FILES, instance=resume)
         if form.is_valid():
-            resume_obj = form.save(commit=False)
-            resume_obj.job_seeker = seeker_profile
-            if resume_obj.uploaded_file:
-                extracted = extract_text_from_file(resume_obj.uploaded_file)
-                resume_obj.extracted_text = extracted
+            # Extract text from uploaded file before saving
+            if form.cleaned_data.get('uploaded_file'):
+                extracted = extract_text_from_file(form.cleaned_data['uploaded_file'])
+            else:
+                extracted = ''
+            
+            # Save with job_seeker parameter only when creating new resume
+            # When updating, the instance already has the job_seeker set
+            if resume is None:
+                resume_obj = form.save(commit=False, job_seeker=seeker_profile)
+            else:
+                resume_obj = form.save(commit=False)
+            resume_obj.extracted_text = extracted
             resume_obj.save()
             messages.success(request, 'Resume uploaded and parsed successfully.')
             return redirect('seeker_dashboard')
@@ -192,10 +215,11 @@ def apply_job(request, job_id):
         messages.error(request, 'Please upload a resume before applying.')
         return redirect('upload_resume')
 
+    score, keywords = compute_relevance(job.description, resume.extracted_text)
     application, created = Application.objects.get_or_create(
         job=job,
         job_seeker=seeker_profile,
-        defaults={'match_score': compute_relevance(job.description, resume.extracted_text)},
+        defaults={'match_score': score},
     )
 
     if not created:
@@ -266,6 +290,18 @@ def job_applicants(request, job_id):
     job = get_object_or_404(Job, id=job_id, employer=employer_profile)
     applications = Application.objects.filter(job=job).select_related('job_seeker__user')
     status_counts = applications.values('status').annotate(count=Count('id'))
+    
+    # Add top keywords to each application
+    for application in applications:
+        try:
+            if application.job_seeker.resume and application.job_seeker.resume.extracted_text:
+                _, keywords = compute_relevance(job.description, application.job_seeker.resume.extracted_text)
+                application.top_keywords = keywords
+            else:
+                application.top_keywords = []
+        except JobSeekerProfile.resume.RelatedObjectDoesNotExist:
+            application.top_keywords = []
+    
     return render(request, 'core/applicants.html', {
         'job': job,
         'applications': applications,
@@ -306,11 +342,12 @@ def admin_dashboard(request):
     employers_count = CustomUser.objects.filter(role='employer').count()
     total_jobs = Job.objects.count()
     total_applications = Application.objects.count()
-
-    recent_logs = [
-        {'user': 'John Doe', 'access_time': '12:00 PM', 'status': 'Successful'},
-        {'user': 'Jane Smith', 'access_time': '12:15 PM', 'status': 'Failed'},
-    ]
+    
+    # Get all users for management
+    all_users = CustomUser.objects.exclude(role='admin').order_by('-date_joined')
+    
+    # Get recent jobs for moderation
+    recent_jobs = Job.objects.order_by('-date_posted')[:10]
 
     context = {
         'total_users': total_users,
@@ -318,8 +355,54 @@ def admin_dashboard(request):
         'employers_count': employers_count,
         'total_jobs': total_jobs,
         'total_applications': total_applications,
+        'all_users': all_users,
+        'recent_jobs': recent_jobs,
         'data_breaches': 0,
         'alerts': 5,
-        'recent_logs': recent_logs,
     }
     return render(request, 'core/admin_dashboard.html', context)
+
+
+@login_required
+def admin_deactivate_user(request, user_id):
+    if request.user.role != 'admin':
+        return HttpResponseForbidden('Access restricted to administrators.')
+    
+    user = get_object_or_404(CustomUser, id=user_id)
+    if user.role == 'admin':
+        messages.error(request, 'Cannot deactivate another administrator.')
+        return redirect('admin_dashboard')
+    
+    user.is_active = not user.is_active
+    user.save()
+    status = 'activated' if user.is_active else 'deactivated'
+    messages.success(request, f'User {user.email} has been {status}.')
+    return redirect('admin_dashboard')
+
+
+@login_required
+def admin_delete_user(request, user_id):
+    if request.user.role != 'admin':
+        return HttpResponseForbidden('Access restricted to administrators.')
+    
+    user = get_object_or_404(CustomUser, id=user_id)
+    if user.role == 'admin':
+        messages.error(request, 'Cannot delete another administrator.')
+        return redirect('admin_dashboard')
+    
+    email = user.email
+    user.delete()
+    messages.success(request, f'User {email} has been deleted.')
+    return redirect('admin_dashboard')
+
+
+@login_required
+def admin_delete_job(request, job_id):
+    if request.user.role != 'admin':
+        return HttpResponseForbidden('Access restricted to administrators.')
+    
+    job = get_object_or_404(Job, id=job_id)
+    job_title = job.title
+    job.delete()
+    messages.success(request, f'Job "{job_title}" has been deleted by admin.')
+    return redirect('admin_dashboard')

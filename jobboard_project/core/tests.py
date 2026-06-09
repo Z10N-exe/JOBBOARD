@@ -28,8 +28,8 @@ class CoreTests(TestCase):
             reverse('register_seeker'),
             data={
                 'email': 'seeker@test.com',
-                'password1': 'TestPass123',
-                'password2': 'TestPass123',
+                'password1': 'TestPass123!',
+                'password2': 'TestPass123!',
                 'role': 'seeker',
                 'first_name': 'Jane',
                 'last_name': 'Doe',
@@ -49,8 +49,8 @@ class CoreTests(TestCase):
             reverse('register_employer'),
             data={
                 'email': 'employer2@test.com',
-                'password1': 'TestPass123',
-                'password2': 'TestPass123',
+                'password1': 'TestPass123!',
+                'password2': 'TestPass123!',
                 'role': 'employer',
                 'company_name': 'Test Corp',
                 'company_description': 'We build test products.',

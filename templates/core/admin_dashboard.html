@@ -1,25 +1,87 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="background:#111827;color:#e5e7eb;padding:24px;border-radius:12px;overflow-x:auto;">
-    <pre style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; color:#f8fafc; line-height:1.4;">
-+----------------------------------------------------------+
-|                     Admin Dashboard                      |
-+----------------------------------------------------------+
-| Total Users: {{ total_users }} | Data Breaches: {{ data_breaches }} | Alerts: {{ alerts }} |
-+----------------------------------------------------------+
-| Total Job Posts: {{ total_jobs }} | Applications: {{ total_applications }} |
-| Seekers: {{ seekers_count }} | Employers: {{ employers_count }} |
-+----------------------------------------------------------+
-| Recent Access Logs:                                       |
-| [User]          [Access Time]   [Status]                  |
-{% for log in recent_logs %}| {{ log.user }} | {{ log.access_time }} | {{ log.status }} |
-{% endfor %}+----------------------------------------------------------+
-| System Health:                                            |
-| CPU Usage: 30%  | Memory Usage: 48%                       |
-+----------------------------------------------------------+
-| [Download Reports] [View Detailed Logs]                    |
-+----------------------------------------------------------+
-    </pre>
+<div class="hero">
+    <h1>Admin Dashboard</h1>
+    <p>System overview, user management, and content moderation</p>
 </div>
+
+<section class="summary-grid">
+    <div class="card">
+        <h3>Total Users</h3>
+        <p>{{ total_users }}</p>
+        <p>{{ seekers_count }} seekers | {{ employers_count }} employers</p>
+    </div>
+    <div class="card">
+        <h3>Total Jobs</h3>
+        <p>{{ total_jobs }}</p>
+    </div>
+    <div class="card">
+        <h3>Total Applications</h3>
+        <p>{{ total_applications }}</p>
+    </div>
+</section>
+
+<section>
+    <h2>User Management</h2>
+    {% if all_users %}
+        <table>
+            <thead>
+                <tr><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for user in all_users %}
+                    <tr>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.get_role_display }}</td>
+                        <td>
+                            <span class="status-badge {{ user.is_active|yesno:'active,inactive' }}">
+                                {{ user.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </td>
+                        <td>{{ user.date_joined|date:'Y-m-d' }}</td>
+                        <td>
+                            <a class="button" href="{% url 'admin_deactivate_user' user.id %}">
+                                {{ user.is_active|yesno:"Deactivate,Activate" }}
+                            </a>
+                            <a class="button button-secondary" href="{% url 'admin_delete_user' user.id %}">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No users found.</p>
+    {% endif %}
+</section>
+
+<section>
+    <h2>Recent Jobs (Content Moderation)</h2>
+    {% if recent_jobs %}
+        <table>
+            <thead>
+                <tr><th>Job Title</th><th>Employer</th><th>Posted</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for job in recent_jobs %}
+                    <tr>
+                        <td>{{ job.title }}</td>
+                        <td>{{ job.employer.company_name }}</td>
+                        <td>{{ job.date_posted|date:'Y-m-d' }}</td>
+                        <td>
+                            <span class="status-badge {{ job.is_active|yesno:'active,inactive' }}">
+                                {{ job.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </td>
+                        <td>
+                            <a class="button button-secondary" href="{% url 'admin_delete_job' job.id %}">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No jobs found.</p>
+    {% endif %}
+</section>
 {% endblock %}
